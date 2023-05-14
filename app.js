@@ -13,6 +13,7 @@ let chance = true
 board.style.top = `${(window.innerHeight - dim)/2}px`
 board.style.left = `${(window.innerWidth - dim)/2}px`
 
+
 for(let j = 0; j < 8; j++){
     let mrkp = ''
     for(let i = 0; i < 8; i++){
@@ -21,7 +22,7 @@ for(let j = 0; j < 8; j++){
         if((j%2 == 0 && i%2 == 0) || (j%2 == 1 && i%2 == 1)){
             color = 'rgb(100, 100, 100)'
         }
-        mrkp += `<div class="block" style="width: ${(dim/8) - 7.2}px;height: ${(dim/8) - 20}px; margin: 2px;background-color: ${color};" id="${i + (j * 8)}" onclick="move(${i + (j * 8)})"> </div>`
+        mrkp += `<div class="block" style="width: ${(dim/8) - 4}px;height: ${(dim/8) - 4}px; margin: 2px;background-color: ${color};" id="${i + (j * 8)}" onclick="move(${i + (j * 8)})"> </div>`
     }
     let markup = `<div class="row">${mrkp}</div>`
     board.insertAdjacentHTML('beforeend',markup)
@@ -57,7 +58,7 @@ function show(){
             let ind = j + (i * 8)
             document.getElementById(`${ind}`).innerHTML = ' '
             if(grid[ind] != ' '){
-                let markup = `<img src="${piece[grid[ind]]}" alt="">`
+                let markup = `<img src="${piece[grid[ind]]}" style="scale:${((dim/8) - 4)/(dim/6)};" alt="">`
                 document.getElementById(`${ind}`).innerHTML = markup
             }
         }
@@ -203,6 +204,8 @@ function pawn(i,wh,gr){
     if(wh && i < 64){if(friendOrFoe(i - 8,wh,legal,true,gr) == false){legal.push(i - 8)}}
     if(wh && i%8 < 7){friendOrFoe(i - 7,wh,legal,false,gr)}
     if(wh && i%8 > 0){friendOrFoe(i - 9,wh,legal,false,gr)}
+    if(wh && i - 7 > 0 && i%8 < 7){if(grid[i - 7] == ' ' && moves[moves.length - 1] == `${i-15}p${i+1}`){legal.push(i - 7)}}
+    if(wh && i - 9 > 0 && i%8 > 0){if(grid[i - 9] == ' ' && moves[moves.length - 1] == `${i-17}p${i-1}`){legal.push(i - 9)}}
 
     //Black
 
@@ -212,9 +215,10 @@ function pawn(i,wh,gr){
     if(wh == false && i < 64){if(friendOrFoe(i + 8,wh,legal,true,gr) == false){legal.push(i + 8)}}
     if(wh == false && i%8 > 0){friendOrFoe(i + 7,wh,legal,false,gr)}
     if(wh == false && i%8 < 7){friendOrFoe(i + 9,wh,legal,false,gr)}
+    if(wh == false && i + 7 < 64 && i%8 > 0){if(grid[i + 7] == ' ' && moves[moves.length - 1] == `${i+15}P${i-1}`){legal.push(i + 7)}}
+    if(wh == false && i + 9 < 64 && i%8 < 7){if(grid[i + 9] == ' ' && moves[moves.length - 1] == `${i+17}P${i+1}`){legal.push(i + 9)}}
     return legal
 }
-
 
 function king(i,wh,gr){
     let legal = []
@@ -283,6 +287,24 @@ function move(ind){
             moves.push(`${sel}${grid[sel]}${ind}`)
             if(chance && grid[ind] != ' '){whCap += grid[ind]}
             if(chance == false && grid[ind] != ' '){blCap += grid[ind]}
+            if(grid[ind] == ' ' && grid[sel].toLowerCase() == 'p' && Math.abs(ind - sel)%8 != 0){
+                if(chance && Math.abs(ind - sel) > 8){
+                    whCap += grid[sel - 1]
+                    grid[sel - 1] = ' '
+                }
+                else if(chance && Math.abs(ind - sel) < 8){
+                    whCap += grid[sel + 1]
+                    grid[sel + 1] = ' '
+                }
+                else if(chance == false && Math.abs(ind - sel) < 8){
+                    blCap += grid[sel - 1]
+                    grid[sel - 1] = ' '
+                }
+                else if(chance == false && Math.abs(ind - sel) > 8){
+                    blCap += grid[sel + 1]
+                    grid[sel + 1] = ' '
+                }
+            }
             blcap.innerText = blCap
             whcap.innerText = whCap
             grid[ind] = grid[sel]
