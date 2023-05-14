@@ -272,7 +272,7 @@ function move(ind){
         if(grid[ind] == grid[ind].toUpperCase()){
             wh = true
         }
-        if(wh == chance){
+        if(wh == chance && grid[ind] != ' '){
             selLegal = legalMoves(ind,wh,grid)
             selLegal = filtering(selLegal,ind)
             sel = ind
