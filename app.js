@@ -1,6 +1,4 @@
 const board = document.getElementById('board')
-const whcap = document.getElementById('whCap')
-const blcap = document.getElementById('blCap')
 let dim = Math.min(window.innerHeight,window.innerWidth)
 let grid = []
 let FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
@@ -18,11 +16,11 @@ for(let j = 0; j < 8; j++){
     let mrkp = ''
     for(let i = 0; i < 8; i++){
         grid.push(' ')
-        let color = 'rgb(70, 70, 70)'
+        let color = 'rgb(70, 150, 80)'
         if((j%2 == 0 && i%2 == 0) || (j%2 == 1 && i%2 == 1)){
-            color = 'rgb(100, 100, 100)'
+            color = 'rgb(250,250,250)'
         }
-        mrkp += `<div class="block" style="width: ${(dim/8) - 4}px;height: ${(dim/8) - 4}px; margin: 2px;background-color: ${color};" id="${i + (j * 8)}" onclick="move(${i + (j * 8)})"> </div>`
+        mrkp += `<div class="block" style="width: ${(dim/8)}px;height: ${(dim/8)}px; margin: 0px;background-color: ${color};" id="${i + (j * 8)}" onclick="move(${i + (j * 8)})"> </div>`
     }
     let markup = `<div class="row">${mrkp}</div>`
     board.insertAdjacentHTML('beforeend',markup)
@@ -58,7 +56,7 @@ function show(){
             let ind = j + (i * 8)
             document.getElementById(`${ind}`).innerHTML = ' '
             if(grid[ind] != ' '){
-                let markup = `<img src="${piece[grid[ind]]}" style="scale:${((dim/8) - 4)/(dim/6)};" alt="">`
+                let markup = `<img src="${piece[grid[ind]]}" style="scale:${((dim/8) - 4)/(dim/7)};" alt="">`
                 document.getElementById(`${ind}`).innerHTML = markup
             }
         }
@@ -230,6 +228,9 @@ function king(i,wh,gr){
     if(i + 7 < 64 && i%8 > 0){if(friendOrFoe(i + 7,wh,legal,false,gr) == false){legal.push(i + 7)}}
     if(i - 1 >= 0  && i%8 > 0){if(friendOrFoe(i - 1,wh,legal,false,gr) == false){legal.push(i - 1)}}
     if(i + 1 < 64  && i%8 < 7){if(friendOrFoe(i + 1,wh,legal,false,gr) == false){legal.push(i + 1)}}
+
+    // Castling
+
     return legal
 }
 
@@ -256,30 +257,39 @@ function friendOrFoe(ind,wh,l,p,gr){
 function reset(){
     for(let j = 0; j < 8; j++){
         for(let i = 0; i < 8; i++){
-            let color = "rgb(70, 70, 70)"
+            let color = "rgb(70, 150, 80)"
             if((j%2 == 0 && i%2 == 0) || (j%2 == 1 && i%2 == 1)){
-                color = "rgb(100, 100, 100)"
+                color = "rgb(250, 250, 250)"
             }
-            document.getElementById(`${i + (j * 8)}`).style.backgroundColor = color
+            document.getElementById(i + j * 8).style.borderRadius = '0px'
+            document.getElementById(i + j * 8).style.backgroundColor = color
+            show()
         }
     }
 }
 
 function move(ind){
     if(sel == null){
-        reset()
         let wh = false
         if(grid[ind] == grid[ind].toUpperCase()){
             wh = true
         }
         if(wh == chance && grid[ind] != ' '){
+            // reset()
             selLegal = legalMoves(ind,wh,grid)
             selLegal = filtering(selLegal,ind)
             sel = ind
-            document.getElementById(ind).style.backgroundColor = "rgb(100,80,0)"
+            document.getElementById(ind).style.backgroundColor = "rgb(255,255,50)"
+            // document.getElementById(ind).style.scale = `${((dim/8) - 4)/(dim/6)}`
         }
         selLegal.forEach(e => {
-            document.getElementById(e).style.backgroundColor = "rgb(150,120,0)"
+            // document.getElementById(e).style.backgroundColor = "rgb(250,250,150)"
+            if(grid[e] == ' '){
+                document.getElementById(e).insertAdjacentHTML('beforeend',`<div class="circle" style="width: ${dim/20}px;height: ${dim/20}px; border-radius: ${dim/20}px;margin: ${dim/28}px 0px 0px ${dim/28}px;"></div>`)
+            }
+            else{
+                document.getElementById(e).style.borderRadius = `${dim/32}px`
+            }
         });
     }
     else{
@@ -287,33 +297,17 @@ function move(ind){
             moves.push(`${sel}${grid[sel]}${ind}`)
             if(chance && grid[ind] != ' '){whCap += grid[ind]}
             if(chance == false && grid[ind] != ' '){blCap += grid[ind]}
-            if(grid[ind] == ' ' && grid[sel].toLowerCase() == 'p' && Math.abs(ind - sel)%8 != 0){
-                if(chance && Math.abs(ind - sel) > 8){
-                    whCap += grid[sel - 1]
-                    grid[sel - 1] = ' '
-                }
-                else if(chance && Math.abs(ind - sel) < 8){
-                    whCap += grid[sel + 1]
-                    grid[sel + 1] = ' '
-                }
-                else if(chance == false && Math.abs(ind - sel) < 8){
-                    blCap += grid[sel - 1]
-                    grid[sel - 1] = ' '
-                }
-                else if(chance == false && Math.abs(ind - sel) > 8){
-                    blCap += grid[sel + 1]
-                    grid[sel + 1] = ' '
-                }
-            }
-            blcap.innerText = blCap
-            whcap.innerText = whCap
+            let int = enPessant(ind,sel)
+            if(int != null){if(chance){whCap += grid[sel + int]}else{blCap += grid[sel + int]};grid[sel + int] = ' '}
             grid[ind] = grid[sel]
             grid[sel] = ' '
-            sel = null
             selLegal = []
             if(chance){chance = false}else{chance = true}
             // console.log(grid,selLegal);
             reset()
+            document.getElementById(sel).style.backgroundColor = "rgb(255,255,100)"
+            document.getElementById(ind).style.backgroundColor = "rgb(255,255,100)"
+            sel = null
             show()
             setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
             
@@ -396,4 +390,16 @@ function isCheckMate(wh,g){
     }
     console.log('checkmate');
     return true
+}
+
+function enPessant(ind,sel){
+    if(grid[ind] == ' ' && grid[sel].toLowerCase() == 'p' && Math.abs(ind - sel)%8 != 0){
+        if((chance && Math.abs(ind - sel) > 8) || (chance == false && Math.abs(ind - sel) < 8)){
+            return -1
+        }
+        else if((chance && Math.abs(ind - sel) < 8) || (chance == false && Math.abs(ind - sel) > 8)){
+            return 1
+        }
+    }
+    return null
 }
