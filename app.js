@@ -8,6 +8,10 @@ let moves = []
 let whCap = ''
 let blCap = ''
 let chance = true
+let BCasR = true
+let BCasL = true
+let WCasR = true
+let WCasL = true
 board.style.top = `${(window.innerHeight - dim)/2}px`
 board.style.left = `${(window.innerWidth - dim)/2}px`
 
@@ -230,7 +234,10 @@ function king(i,wh,gr){
     if(i + 1 < 64  && i%8 < 7){if(friendOrFoe(i + 1,wh,legal,false,gr) == false){legal.push(i + 1)}}
 
     // Castling
-
+    if(wh && WCasR && grid[i + 1] == ' ' && grid[i + 2] == ' '){legal.push(i + 2)}
+    if(wh && WCasL && grid[i - 1] == ' ' && grid[i - 2] == ' ' && grid[i - 3] == ' '){legal.push(i - 2)}
+    if(wh == false && BCasR && grid[i + 1] == ' ' && grid[i + 2] == ' '){legal.push(i + 2)}
+    if(wh == false && BCasL && grid[i - 1] == ' ' && grid[i - 2] == ' ' && grid[i - 3] == ' '){legal.push(i - 2)}
     return legal
 }
 
@@ -295,6 +302,9 @@ function move(ind){
     else{
         if(selLegal.includes(ind)){
             moves.push(`${sel}${grid[sel]}${ind}`)
+            canCastle(sel,ind)
+            if(grid[sel].toLowerCase() == 'k' && ind - sel == -2){grid[ind + 1] = grid[ind - 2];grid[ind - 2] = ' '}
+            if(grid[sel].toLowerCase() == 'k' && ind - sel == 2){grid[ind - 1] = grid[ind + 1];grid[ind + 1] = ' '}
             if(chance && grid[ind] != ' '){whCap += grid[ind]}
             if(chance == false && grid[ind] != ' '){blCap += grid[ind]}
             let int = enPessant(ind,sel)
@@ -402,4 +412,15 @@ function enPessant(ind,sel){
         }
     }
     return null
+}
+
+function canCastle(sel,ind){
+    if(WCasL || WCasR || BCasL || BCasR){
+        if(grid[sel] == 'K'){WCasL = false; WCasR = false}
+        if(grid[sel] == 'k'){BCasL = false; BCasR = false}
+        if(grid[sel] == 'R'){if(sel%8 == 0){WCasL = false}else if (sel%8 == 7){WCasR = false}}
+        if(grid[sel] == 'r'){if(sel%8 == 0){BCasL = false}else if (sel%8 == 7){BCasR = false}}
+        if(grid[ind] == 'R'){if(ind%8 == 0){WCasL = false}else if (ind%8 == 7){WCasR = false}}
+        if(grid[ind] == 'r'){if(ind%8 == 0){BCasL = false}else if (ind%8 == 7){BCasR = false}}
+    }
 }
