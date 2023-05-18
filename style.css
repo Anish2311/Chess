@@ -50,3 +50,11 @@ img{
     margin: 0rem 0rem 0rem 0rem;
     background-color: rgb(0, 0, 0,0.3);
 }
+.check{
+    width: 2rem;
+    height: 2rem;
+    background-color: rgb(255, 255, 255);
+    border-style: solid;
+    border-color: rgb(70, 150, 80);
+    border-radius: 0.4rem;
+}

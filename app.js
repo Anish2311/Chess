@@ -12,26 +12,41 @@ let BCasR = true
 let BCasL = true
 let WCasR = true
 let WCasL = true
+let check = true
 board.style.top = `${(window.innerHeight - dim)/2}px`
 board.style.left = `${(window.innerWidth - dim)/2}px`
 
-
 for(let j = 0; j < 8; j++){
-    let mrkp = ''
     for(let i = 0; i < 8; i++){
         grid.push(' ')
-        let color = 'rgb(70, 150, 80)'
-        if((j%2 == 0 && i%2 == 0) || (j%2 == 1 && i%2 == 1)){
-            color = 'rgb(250,250,250)'
-        }
-        mrkp += `<div class="block" style="width: ${(dim/8)}px;height: ${(dim/8)}px; margin: 0px;background-color: ${color};" id="${i + (j * 8)}" onclick="move(${i + (j * 8)})"> </div>`
     }
-    let markup = `<div class="row">${mrkp}</div>`
-    board.insertAdjacentHTML('beforeend',markup)
 }
 
 fenConv(FEN)
-show()
+initialize()
+
+function initialize(){
+    board.innerHTML = ''
+    for(let j = 0; j < 8; j++){
+        let mrkp = ''
+        for(let i = 0; i < 8; i++){
+            // grid.push(' ')
+            let color = 'rgb(70, 150, 80)'
+            if((j%2 == 0 && i%2 == 0) || (j%2 == 1 && i%2 == 1)){
+                color = 'rgb(250,250,250)'
+            }
+            mrkp += `<div class="block" style="width: ${(dim/8)}px;height: ${(dim/8)}px; margin: 0px;background-color: ${color};" id="${i + (j * 8)}" onclick="move(${i + (j * 8)})"> </div>`
+        }
+        let markup = `<div class="row">${mrkp}</div>`
+        if(check == false){
+            board.insertAdjacentHTML('afterbegin',markup)
+        }
+        else{
+            board.insertAdjacentHTML('beforeend',markup)
+        }
+    }
+    show()
+}
 
 function fenConv(fen){
     let x = 0
@@ -424,3 +439,8 @@ function canCastle(sel,ind){
         if(grid[ind] == 'r'){if(ind%8 == 0){BCasL = false}else if (ind%8 == 7){BCasR = false}}
     }
 }
+
+document.getElementById('rot').addEventListener('click',()=>{
+    if(check){check = false; document.getElementById('rot').style.backgroundColor = 'black'}else{check = true; document.getElementById('rot').style.backgroundColor = 'white'}
+    initialize()
+})
