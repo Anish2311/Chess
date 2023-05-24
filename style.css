@@ -26,10 +26,6 @@
     margin: 0rem;
 }
 
-img{
-    margin: 0rem 0rem 0rem 0rem;
-}
-
 .captures{
     background-color: gray;
     padding: 0.4rem;
@@ -57,4 +53,19 @@ img{
     border-style: solid;
     border-color: rgb(70, 150, 80);
     border-radius: 0.4rem;
+}
+
+.prom{
+    background-color: rgb(70, 150, 80);
+    padding: 0.4rem;
+    width: fit-content;
+    height: fit-content;
+    display: flex;
+    flex-direction: column;
+    border-radius: 1rem;
+    position: fixed;
+    left: 2rem;
+    top: 2rem;
+    justify-content: space-around;
+    display: none;
 }

@@ -1,4 +1,5 @@
 const board = document.getElementById('board')
+const prom = document.getElementById('promotion')
 let dim = Math.min(window.innerHeight,window.innerWidth)
 let grid = []
 let FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
@@ -13,8 +14,23 @@ let BCasL = true
 let WCasR = true
 let WCasL = true
 let check = true
+let canContinue = true
 board.style.top = `${(window.innerHeight - dim)/2}px`
 board.style.left = `${(window.innerWidth - dim)/2}px`
+if(dim == window.innerHeight){
+    prom.style.top = `${((window.innerHeight - dim)/2) + 32}px`
+    prom.style.left = `${((window.innerWidth - dim)/2) - 144}px`
+    prom.style.height = `${dim - 98}px`
+    prom.style.width = `${dim/8}px`
+    prom.style.flexDirection = "coloumn"
+}
+else{
+    prom.style.top = `${((window.innerHeight - dim)/2) - 70}px`
+    prom.style.left = `${((window.innerWidth - dim)/2) + 16}px`
+    prom.style.height = `${(dim/8)}px`
+    prom.style.width = `${dim-48}px`
+    prom.style.flexDirection = "row"
+}
 
 for(let j = 0; j < 8; j++){
     for(let i = 0; i < 8; i++){
@@ -291,57 +307,68 @@ function reset(){
 }
 
 function move(ind){
-    if(sel == null){
-        let wh = false
-        if(grid[ind] == grid[ind].toUpperCase()){
-            wh = true
-        }
-        if(wh == chance && grid[ind] != ' '){
-            // reset()
-            selLegal = legalMoves(ind,wh,grid)
-            selLegal = filtering(selLegal,ind)
-            sel = ind
-            document.getElementById(ind).style.backgroundColor = "rgb(255,255,50)"
-            // document.getElementById(ind).style.scale = `${((dim/8) - 4)/(dim/6)}`
-        }
-        selLegal.forEach(e => {
-            // document.getElementById(e).style.backgroundColor = "rgb(250,250,150)"
-            if(grid[e] == ' '){
-                document.getElementById(e).insertAdjacentHTML('beforeend',`<div class="circle" style="width: ${dim/20}px;height: ${dim/20}px; border-radius: ${dim/20}px;margin: ${dim/28}px 0px 0px ${dim/28}px;"></div>`)
+    if(canContinue){
+        if(sel == null){
+            let wh = false
+            if(grid[ind] == grid[ind].toUpperCase()){
+                wh = true
             }
-            else{
-                document.getElementById(e).style.borderRadius = `${dim/32}px`
+            if(wh == chance && grid[ind] != ' '){
+                // reset()
+                selLegal = legalMoves(ind,wh,grid)
+                selLegal = filtering(selLegal,ind)
+                sel = ind
+                document.getElementById(ind).style.backgroundColor = "rgb(255,255,50)"
+                // document.getElementById(ind).style.scale = `${((dim/8) - 4)/(dim/6)}`
             }
-        });
-    }
-    else{
-        if(selLegal.includes(ind)){
-            moves.push(`${sel}${grid[sel]}${ind}`)
-            canCastle(sel,ind)
-            if(grid[sel].toLowerCase() == 'k' && ind - sel == -2){grid[ind + 1] = grid[ind - 2];grid[ind - 2] = ' '}
-            if(grid[sel].toLowerCase() == 'k' && ind - sel == 2){grid[ind - 1] = grid[ind + 1];grid[ind + 1] = ' '}
-            if(chance && grid[ind] != ' '){whCap += grid[ind]}
-            if(chance == false && grid[ind] != ' '){blCap += grid[ind]}
-            let int = enPessant(ind,sel)
-            if(int != null){if(chance){whCap += grid[sel + int]}else{blCap += grid[sel + int]};grid[sel + int] = ' '}
-            grid[ind] = grid[sel]
-            grid[sel] = ' '
-            selLegal = []
-            if(chance){chance = false}else{chance = true}
-            // console.log(grid,selLegal);
-            reset()
-            document.getElementById(sel).style.backgroundColor = "rgb(255,255,100)"
-            document.getElementById(ind).style.backgroundColor = "rgb(255,255,100)"
-            sel = null
-            show()
-            setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
-            
+            selLegal.forEach(e => {
+                // document.getElementById(e).style.backgroundColor = "rgb(250,250,150)"
+                if(grid[e] == ' '){
+                    document.getElementById(e).insertAdjacentHTML('beforeend',`<div class="circle" style="width: ${dim/20}px;height: ${dim/20}px; border-radius: ${dim/20}px;margin: ${dim/28}px 0px 0px ${dim/28}px;"></div>`)
+                }
+                else{
+                    document.getElementById(e).style.borderRadius = `${dim/32}px`
+                }
+            });
         }
         else{
-            sel = null
-            selLegal = []
-            reset()
-            move(ind)
+            if(selLegal.includes(ind)){
+                moves.push(`${sel}${grid[sel]}${ind}`)
+                //Castling
+                canCastle(sel,ind)
+                if(grid[sel].toLowerCase() == 'k' && ind - sel == -2){grid[ind + 1] = grid[ind - 2];grid[ind - 2] = ' '}
+                if(grid[sel].toLowerCase() == 'k' && ind - sel == 2){grid[ind - 1] = grid[ind + 1];grid[ind + 1] = ' '}
+                //Captures
+                if(chance && grid[ind] != ' '){whCap += grid[ind]}
+                if(chance == false && grid[ind] != ' '){blCap += grid[ind]}
+                //Enpessant
+                let int = enPessant(ind,sel)
+                if(int != null){if(chance){whCap += grid[sel + int]}else{blCap += grid[sel + int]};grid[sel + int] = ' '}
+                //Promotion
+                if(ind < 8 && grid[sel]  == 'P'){prom.insertAdjacentHTML('beforeend',promotionMarkup(true,ind)); prom.style.display = "flex"; canContinue = false}
+                if(ind > 55 && grid[sel]  == 'p'){prom.insertAdjacentHTML('beforeend',promotionMarkup(false,ind)); prom.style.display = "flex"; canContinue = false}
+                //Moving
+                grid[ind] = grid[sel]
+                grid[sel] = ' '
+                if(canContinue){
+                    selLegal = []
+                    if(chance){chance = false}else{chance = true}
+                    reset()
+                    document.getElementById(sel).style.backgroundColor = "rgb(255,255,100)"
+                    document.getElementById(ind).style.backgroundColor = "rgb(255,255,100)"
+                    sel = null
+                    show()
+                    //Checkmate alert
+                    setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
+                }
+                
+            }
+            else{
+                sel = null
+                selLegal = []
+                reset()
+                move(ind)
+            }
         }
     }
 }
@@ -438,6 +465,32 @@ function canCastle(sel,ind){
         if(grid[ind] == 'R'){if(ind%8 == 0){WCasL = false}else if (ind%8 == 7){WCasR = false}}
         if(grid[ind] == 'r'){if(ind%8 == 0){BCasL = false}else if (ind%8 == 7){BCasR = false}}
     }
+}
+
+function promotionMarkup(wh,ind){
+    let p = ['Q','B','N','R','q','b','n','r']
+    let m = ''
+    p.forEach(e => {
+        if((e.toUpperCase() == e) == wh){
+            m += `<img src="${piece[e]}"  alt="" onclick="promote('${e}',${ind})">`
+        }
+    });
+    return m
+}
+
+function promote(e,ind){
+    grid[ind] = `${e}`
+    canContinue = true
+    selLegal = []
+    if(chance){chance = false}else{chance = true}
+    reset()
+    document.getElementById(sel).style.backgroundColor = "rgb(255,255,100)"
+    document.getElementById(ind).style.backgroundColor = "rgb(255,255,100)"
+    sel = null
+    show()
+    prom.style.display = "none"
+    //Checkmate alert
+    setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
 }
 
 document.getElementById('rot').addEventListener('click',()=>{
