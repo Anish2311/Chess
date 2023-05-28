@@ -265,10 +265,14 @@ function king(i,wh,gr){
     if(i + 1 < 64  && i%8 < 7){if(friendOrFoe(i + 1,wh,legal,false,gr) == false){legal.push(i + 1)}}
 
     // Castling
-    if(wh && WCasR && grid[i + 1] == ' ' && grid[i + 2] == ' '){legal.push(i + 2)}
-    if(wh && WCasL && grid[i - 1] == ' ' && grid[i - 2] == ' ' && grid[i - 3] == ' '){legal.push(i - 2)}
-    if(wh == false && BCasR && grid[i + 1] == ' ' && grid[i + 2] == ' '){legal.push(i + 2)}
-    if(wh == false && BCasL && grid[i - 1] == ' ' && grid[i - 2] == ' ' && grid[i - 3] == ' '){legal.push(i - 2)}
+    if(isThere(wh,gr,i+1,true) == false && isThere(wh,gr,i+2,true) == false && isThere(wh,gr,i,true) == false){
+        if(wh && WCasR && gr[i + 1] == ' ' && gr[i + 2] == ' '){legal.push(i + 2)}
+        if(wh == false && BCasR && gr[i + 1] == ' ' && gr[i + 2] == ' '){legal.push(i + 2)}
+    }
+    else if(isThere(wh,gr,i-1,true) == false && isThere(wh,gr,i-2,true) == false && isThere(wh,gr,i-3,true) == false && isThere(wh,gr,i,true) == false){
+        if(wh && WCasL && gr[i - 1] == ' ' && gr[i - 2] == ' ' && gr[i - 3] == ' '){legal.push(i - 2)}
+        if(wh == false && BCasL && gr[i - 1] == ' ' && gr[i - 2] == ' ' && gr[i - 3] == ' '){legal.push(i - 2)}
+    }
     return legal
 }
 
@@ -373,7 +377,7 @@ function move(ind){
     }
 }
 
-function legalMoves(ind,wh,gr){
+function legalMoves(ind,wh,gr,f){
     let legal = []
     if(gr[ind] != ' '){
         if(gr[ind].toLowerCase() == 'r'){
@@ -391,21 +395,18 @@ function legalMoves(ind,wh,gr){
         else if(gr[ind].toLowerCase() == 'p'){
             legal = pawn(ind,wh,gr)
         }
-        else if(gr[ind].toLowerCase() == 'k'){
+        else if(gr[ind].toLowerCase() == 'k' && f != true){
             legal = king(ind,wh,gr)
         }
     }
     return legal
 }
 
-function isCheck(wh,g){
-    let ind = 0;
-    if(wh){ind = g.indexOf('K')}
-    else{ind = g.indexOf('k')}
+function isThere(wh,g,ind,f){
     for(let i = 0; i < g.length; i++){
         if(g[i] != ' '){
             if((g[i] == g[i].toUpperCase()) != wh){
-                if(legalMoves(i,g[i] == g[i].toUpperCase(),g).includes(ind)){
+                if(legalMoves(i,g[i] == g[i].toUpperCase(),g,f).includes(ind)){
                     return true
                 }
             }
@@ -422,7 +423,10 @@ function filtering(a,s){
         gridCopy[e] = gridCopy[s]
         gridCopy[s] = ' '
         // console.log(a);
-        if(isCheck(chance,gridCopy)){
+        let ind = 0
+        if(chance){ind = gridCopy.indexOf('K')}
+        else{ind = gridCopy.indexOf('k')}
+        if(isThere(chance,gridCopy,ind)){
             a.splice(i,1)
             filtering(a,s)
         }
