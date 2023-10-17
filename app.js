@@ -98,7 +98,7 @@ function show(){
     }
 }
 
-function diagnol(i,wh,gr){
+function diagonal(i,wh,gr){
     let ind = i
     let legal = []
     while(ind%8 != 7 && ind >= 0){
@@ -234,22 +234,22 @@ function pawn(i,wh,gr){
     if(wh && i > 47 && i < 56){
         if(friendOrFoe(i - 16,wh,legal,true,gr) == false){legal.push(i - 16)}   
     }
-    if(wh && i < 64){if(friendOrFoe(i - 8,wh,legal,true,gr) == false){legal.push(i - 8)}}
-    if(wh && i%8 < 7){friendOrFoe(i - 7,wh,legal,false,gr)}
-    if(wh && i%8 > 0){friendOrFoe(i - 9,wh,legal,false,gr)}
-    if(wh && i - 7 > 0 && i%8 < 7){if(grid[i - 7] == ' ' && moves[moves.length - 1] == `${i-15}p${i+1}`){legal.push(i - 7)}}
-    if(wh && i - 9 > 0 && i%8 > 0){if(grid[i - 9] == ' ' && moves[moves.length - 1] == `${i-17}p${i-1}`){legal.push(i - 9)}}
+    if(wh && i < 64 && i > 7){if(friendOrFoe(i - 8,wh,legal,true,gr) == false){legal.push(i - 8)}}
+    if(wh && i%8 < 7 && i > 7){friendOrFoe(i - 7,wh,legal,false,gr)}
+    if(wh && i%8 > 0 && i > 7){friendOrFoe(i - 9,wh,legal,false,gr)}
+    if(wh && i - 7 > 0 && i%8 < 7 && i > 7){if(grid[i - 7] == ' ' && moves[moves.length - 1] == `${i-15}p${i+1}`){legal.push(i - 7)}}
+    if(wh && i - 9 > 0 && i%8 > 0 && i > 7){if(grid[i - 9] == ' ' && moves[moves.length - 1] == `${i-17}p${i-1}`){legal.push(i - 9)}}
 
     //Black
 
     if(wh == false && i > 7 && i < 16){
         if(friendOrFoe(i + 16,wh,legal,true,gr) == false){legal.push(i + 16)}   
     }
-    if(wh == false && i < 64){if(friendOrFoe(i + 8,wh,legal,true,gr) == false){legal.push(i + 8)}}
-    if(wh == false && i%8 > 0){friendOrFoe(i + 7,wh,legal,false,gr)}
-    if(wh == false && i%8 < 7){friendOrFoe(i + 9,wh,legal,false,gr)}
-    if(wh == false && i + 7 < 64 && i%8 > 0){if(grid[i + 7] == ' ' && moves[moves.length - 1] == `${i+15}P${i-1}`){legal.push(i + 7)}}
-    if(wh == false && i + 9 < 64 && i%8 < 7){if(grid[i + 9] == ' ' && moves[moves.length - 1] == `${i+17}P${i+1}`){legal.push(i + 9)}}
+    if(wh == false && i < 56){if(friendOrFoe(i + 8,wh,legal,true,gr) == false){legal.push(i + 8)}}
+    if(wh == false && i%8 > 0 && i < 56){friendOrFoe(i + 7,wh,legal,false,gr)}
+    if(wh == false && i%8 < 7 && i < 56){friendOrFoe(i + 9,wh,legal,false,gr)}
+    if(wh == false && i + 7 < 64 && i%8 > 0 && i < 56){if(grid[i + 7] == ' ' && moves[moves.length - 1] == `${i+15}P${i-1}`){legal.push(i + 7)}}
+    if(wh == false && i + 9 < 64 && i%8 < 7 && i < 56){if(grid[i + 9] == ' ' && moves[moves.length - 1] == `${i+17}P${i+1}`){legal.push(i + 9)}}
     return legal
 }
 
@@ -277,7 +277,7 @@ function king(i,wh,gr){
 }
 
 function friendOrFoe(ind,wh,l,p,gr){
-    // console.log(ind,gr);
+    console.log(ind,chance);
     if(gr[ind] == ' '){
         return false
     }
@@ -384,10 +384,10 @@ function legalMoves(ind,wh,gr,f){
             legal = straight(ind,wh,gr)
         }
         else if(gr[ind].toLowerCase() == 'b'){
-            legal = diagnol(ind,wh,gr)
+            legal = diagonal(ind,wh,gr)
         }
         else if(gr[ind].toLowerCase() == 'q'){
-            legal = straight(ind,wh,gr).concat(diagnol(ind,wh,gr))
+            legal = straight(ind,wh,gr).concat(diagonal(ind,wh,gr))
         }
         else if(gr[ind].toLowerCase() == 'n'){
             legal = horsey(ind,wh,gr)
