@@ -69,3 +69,12 @@
     justify-content: space-around;
     display: none;
 }
+
+.piece{
+    scale: 0.9;
+    transition: all 0.05s ease-in-out;
+}
+
+.piece:active{
+    scale: 0.9;
+}

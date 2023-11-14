@@ -91,10 +91,21 @@ function show(){
             let ind = j + (i * 8)
             document.getElementById(`${ind}`).innerHTML = ' '
             if(grid[ind] != ' '){
-                let markup = `<img src="${piece[grid[ind]]}" style="scale:${((dim/8) - 4)/(dim/7)};" alt="">`
+                let markup = `<img src="${piece[grid[ind]]}" class="piece" alt=""  onmouseover="anim(${grid[ind] == grid[ind].toUpperCase()},${ind},false)" onmouseleave="anim(${grid[ind] == grid[ind].toUpperCase()},${ind},true)">`
                 document.getElementById(`${ind}`).innerHTML = markup
             }
         }
+    }
+}
+
+function anim(b,ind,o){
+    if(b == chance && o == false){
+        let obj = document.getElementById(`${ind}`).childNodes[0]
+        obj.style.scale = "0.8"
+    }
+    else if(b == chance && o == true){
+        let obj = document.getElementById(`${ind}`).childNodes[0]
+        obj.style.scale = "0.9"
     }
 }
 
@@ -217,7 +228,8 @@ function horsey(i,wh,gr){
     }
     if(ind - 10 > 0 && ind%8 > 1){
         if(friendOrFoe(ind - 10,wh,legal,false,gr) == false){
-        legal.push(ind - 10)}
+            legal.push(ind - 10)
+        }
     }
     if(ind + 6 < 64 && ind%8 > 1){
         if(friendOrFoe(ind + 6,wh,legal,false,gr) == false){
@@ -232,7 +244,7 @@ function pawn(i,wh,gr){
     //White
 
     if(wh && i > 47 && i < 56){
-        if(friendOrFoe(i - 16,wh,legal,true,gr) == false){legal.push(i - 16)}   
+        if(friendOrFoe(i - 16,wh,legal,true,gr) == false && friendOrFoe(i - 8,wh,legal,true,gr) == false){legal.push(i - 16)}   
     }
     if(wh && i < 64 && i > 7){if(friendOrFoe(i - 8,wh,legal,true,gr) == false){legal.push(i - 8)}}
     if(wh && i%8 < 7 && i > 7){friendOrFoe(i - 7,wh,legal,false,gr)}
@@ -243,7 +255,7 @@ function pawn(i,wh,gr){
     //Black
 
     if(wh == false && i > 7 && i < 16){
-        if(friendOrFoe(i + 16,wh,legal,true,gr) == false){legal.push(i + 16)}   
+        if(friendOrFoe(i + 16,wh,legal,true,gr) == false && friendOrFoe(i + 8,wh,legal,true,gr) == false){legal.push(i + 16)}   
     }
     if(wh == false && i < 56){if(friendOrFoe(i + 8,wh,legal,true,gr) == false){legal.push(i + 8)}}
     if(wh == false && i%8 > 0 && i < 56){friendOrFoe(i + 7,wh,legal,false,gr)}
@@ -277,7 +289,6 @@ function king(i,wh,gr){
 }
 
 function friendOrFoe(ind,wh,l,p,gr){
-    console.log(ind,chance);
     if(gr[ind] == ' '){
         return false
     }
