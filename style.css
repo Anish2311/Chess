@@ -57,7 +57,9 @@
 
 .prom{
     background-color: rgb(70, 150, 80);
-    border: solid 2px rgb(20,80,20);
+    border-style: solid;
+    border-color: rgb(20,80,20);
+    border-width: 2px;
     padding: 0.4rem;
     width: fit-content;
     height: fit-content;
