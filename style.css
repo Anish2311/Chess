@@ -58,8 +58,8 @@
 .prom{
     background-color: rgb(70, 150, 80);
     border-style: solid;
-    border-color: rgb(20,80,20);
-    border-width: 2px;
+    border-color: rgb(20,20,20);
+    border-width: 1rem;
     padding: 0.4rem;
     width: fit-content;
     height: fit-content;
