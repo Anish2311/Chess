@@ -2,7 +2,7 @@ const board = document.getElementById('board')
 const prom = document.getElementById('promotion')
 let dim = Math.min(window.innerHeight,window.innerWidth)
 let grid = []
-let FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+let FEN = 'r1bqk1nr/pppp1ppp/8/2b5/2n1P3/5P2/PPPP2PP/RNBQK2R'
 let sel = null
 let selLegal = []
 let moves = []
@@ -14,7 +14,12 @@ let BCasL = true
 let WCasR = true
 let WCasL = true
 let check = true
+let lightColor = 'rgb(161, 193, 165)'
+let darkColor = 'rgb(70, 150, 106)'
 let canContinue = true
+let marking = 'abcdefgh'
+let hum = true
+let begining = true
 board.style.top = `${(window.innerHeight - dim)/2}px`
 board.style.left = `${(window.innerWidth - dim)/2}px`
 if(dim == window.innerHeight){
@@ -41,15 +46,78 @@ for(let j = 0; j < 8; j++){
 fenConv(FEN)
 initialize()
 
+if (chance != hum){
+    handleUpload(FEN)
+}
+
+async function handleUpload(fen){
+    const formData = new FormData();
+    formData.append("fenn", fen);
+    formData.append("colour", JSON.stringify(hum));
+    formData.append("starting", JSON.stringify(begining));
+
+    try {
+    const res = await fetch("http://localhost:8000/upload", {
+        method: "POST",
+        // mode: "cors",
+        body: formData,
+    });
+
+    if (!res.ok) {
+        throw new Error("Upload failed");
+    }
+
+    const result = await res.json();
+    moveGot = result['move']
+    // console.log(result);
+    j = marking.indexOf(moveGot[0])
+    y = marking.indexOf(moveGot[3])
+    i = 8 - parseInt(moveGot[1])
+    x = 8 - parseInt(moveGot[4])
+    let bij = moveGot[2]
+    if(moveGot.length == 6){bij = moveGot[5]}
+    let indGoing = y + x * 8
+    let indComing = j + i * 8
+    grid[indGoing] = bij
+    grid[indComing] = ' '
+    if (moveGot.length == 7){
+        let jr = 0
+        let yr = 3
+        if (y > j){
+            jr = 7
+            yr = 5
+        }
+        indGoing = yr + x * 8
+        indComing = jr + i * 8
+        grid[indGoing] = grid[indComing]
+        grid[indComing] = ' '
+    }
+    if(chance){chance = false}else{chance = true}
+    if (begining){begining = false}
+    // console.log(grid,indComing,indGoing);
+    
+    reset()
+    document.getElementById(`${indComing}`).style.backgroundColor = "rgb(255,255,100)"
+    document.getElementById(`${indGoing}`).style.backgroundColor = "rgb(255,255,100)"
+    show()
+    // if(hum){hum = false}else{hum = true}
+    setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
+    // handleUpload(fenGenerator())
+    } catch (err) {
+    console.error(err);
+    alert("Upload failed: " + err.message);
+    }
+};
+
 function initialize(){
     board.innerHTML = ''
     for(let j = 0; j < 8; j++){
         let mrkp = ''
         for(let i = 0; i < 8; i++){
             // grid.push(' ')
-            let color = 'rgb(70, 150, 80)'
+            let color = darkColor
             if((j%2 == 0 && i%2 == 0) || (j%2 == 1 && i%2 == 1)){
-                color = 'rgb(250,250,250)'
+                color = lightColor
             }
             mrkp += `<div class="block" style="width: ${(dim/8)}px;height: ${(dim/8)}px; margin: 0px;background-color: ${color};" id="${i + (j * 8)}" onclick="move(${i + (j * 8)})"> </div>`
         }
@@ -83,6 +151,36 @@ function fenConv(fen){
             }
         }
     }
+}
+
+function fenGenerator(){
+    let sp = 0
+    let fen = ''
+    for(let i = 0; i < grid.length; i++){
+        if (i%8 == 0 && i != 0){
+            if(sp != 0){{
+                fen = fen + `${sp}`
+                sp = 0
+            }}
+            fen += '/'
+        }
+        if(grid[i] == ' '){
+            sp += 1
+        }
+        else{
+            if(sp != 0){{
+                fen = fen + `${sp}`
+                sp = 0
+            }}
+            fen = fen + grid[i]
+        }
+    }
+    if (sp != 0){
+        fen = fen + `${sp}`
+    }
+    console.log(fen);
+    
+    return fen
 }
 
 function show(){
@@ -202,15 +300,15 @@ function straight(i,wh,gr){
 function horsey(i,wh,gr){
     let ind = i
     let legal = []
-    if(ind - 15 > 0 && ind%8 < 7){
+    if(ind - 15 >= 0 && ind%8 < 7){
         if(friendOrFoe(ind - 15,wh,legal,false,gr) == false){
         legal.push(ind - 15)}
     }
-    if(ind - 17 > 0 && ind%8 > 0){
+    if(ind - 17 >= 0 && ind%8 > 0){
         if(friendOrFoe(ind - 17,wh,legal,false,gr) == false){
         legal.push(ind - 17)}
     }
-    if(ind - 6 > 0 && ind%8 < 6){
+    if(ind - 6 >= 0 && ind%8 < 6){
         if(friendOrFoe(ind - 6,wh,legal,false,gr) == false){
         legal.push(ind - 6)}
     }
@@ -226,7 +324,7 @@ function horsey(i,wh,gr){
         if(friendOrFoe(ind + 15,wh,legal,false,gr) == false){
         legal.push(ind + 15)}
     }
-    if(ind - 10 > 0 && ind%8 > 1){
+    if(ind - 10 >= 0 && ind%8 > 1){
         if(friendOrFoe(ind - 10,wh,legal,false,gr) == false){
             legal.push(ind - 10)
         }
@@ -310,9 +408,9 @@ function friendOrFoe(ind,wh,l,p,gr){
 function reset(){
     for(let j = 0; j < 8; j++){
         for(let i = 0; i < 8; i++){
-            let color = "rgb(70, 150, 80)"
+            let color = darkColor
             if((j%2 == 0 && i%2 == 0) || (j%2 == 1 && i%2 == 1)){
-                color = "rgb(250, 250, 250)"
+                color = lightColor
             }
             document.getElementById(i + j * 8).style.borderRadius = '0px'
             document.getElementById(i + j * 8).style.backgroundColor = color
@@ -324,13 +422,9 @@ function reset(){
 function move(ind){
     if(canContinue){
         if(sel == null){
-            let wh = false
-            if(grid[ind] == grid[ind].toUpperCase()){
-                wh = true
-            }
-            if(wh == chance && grid[ind] != ' '){
+            if(chance == hum && (grid[ind] == grid[ind].toUpperCase()) == hum && grid[ind] != ' '){
                 // reset()
-                selLegal = legalMoves(ind,wh,grid)
+                selLegal = legalMoves(ind,hum,grid)
                 selLegal = filtering(selLegal,ind)
                 sel = ind
                 document.getElementById(ind).style.backgroundColor = "rgb(255,255,50)"
@@ -360,8 +454,8 @@ function move(ind){
                 let int = enPessant(ind,sel)
                 if(int != null){if(chance){whCap += grid[sel + int]}else{blCap += grid[sel + int]};grid[sel + int] = ' '}
                 //Promotion
-                if(ind < 8 && grid[sel]  == 'P'){prom.insertAdjacentHTML('beforeend',promotionMarkup(true,ind)); prom.style.display = "flex"; canContinue = false}
-                if(ind > 55 && grid[sel]  == 'p'){prom.insertAdjacentHTML('beforeend',promotionMarkup(false,ind)); prom.style.display = "flex"; canContinue = false}
+                if(ind < 8 && grid[sel]  == 'P'){grid[sel] = 'Q'}
+                if(ind > 55 && grid[sel]  == 'p'){grid[sel] = 'q'}
                 //Moving
                 grid[ind] = grid[sel]
                 grid[sel] = ' '
@@ -373,8 +467,9 @@ function move(ind){
                     document.getElementById(ind).style.backgroundColor = "rgb(255,255,100)"
                     sel = null
                     show()
-                    //Checkmate alert
                     setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
+                    handleUpload(fenGenerator())
+                    //Checkmate alert
                 }
                 
             }
@@ -482,33 +577,42 @@ function canCastle(sel,ind){
     }
 }
 
-function promotionMarkup(wh,ind){
-    let p = ['Q','B','N','R','q','b','n','r']
-    let m = ''
-    p.forEach(e => {
-        if((e.toUpperCase() == e) == wh){
-            m += `<img src="${piece[e]}"  alt="" onclick="promote('${e}',${ind})">`
-        }
-    });
-    return m
-}
+// function promotionMarkup(wh,ind){
+//     let p = ['Q','B','N','R','q','b','n','r']
+//     let m = ''
+//     p.forEach(e => {
+//         if((e.toUpperCase() == e) == wh){
+//             m += `<img src="${piece[e]}"  alt="" onclick="promote('${e}',${ind})">`
+//         }
+//     });
+//     return m
+// }
 
-function promote(e,ind){
-    grid[ind] = `${e}`
-    canContinue = true
-    selLegal = []
-    if(chance){chance = false}else{chance = true}
-    reset()
-    document.getElementById(sel).style.backgroundColor = "rgb(255,255,100)"
-    document.getElementById(ind).style.backgroundColor = "rgb(255,255,100)"
-    sel = null
-    show()
-    prom.style.display = "none"
-    //Checkmate alert
-    setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
-}
+// function promote(e,ind){
+//     grid[ind] = `${e}`
+//     canContinue = true
+//     selLegal = []
+//     if(chance){chance = false}else{chance = true}
+//     reset()
+//     document.getElementById(sel).style.backgroundColor = "rgb(255,255,100)"
+//     document.getElementById(ind).style.backgroundColor = "rgb(255,255,100)"
+//     sel = null
+//     show()
+//     prom.style.display = "none"
+//     //Checkmate alert
+//     setTimeout(function checkmate(){if(isCheckMate(chance,grid)){if(chance){alert('Black has won the game!!')}else{alert('White has won the game!!')}}},500)
+//     handleUpload(fenGenerator())
+// }
 
 document.getElementById('rot').addEventListener('click',()=>{
-    if(check){check = false; document.getElementById('rot').style.backgroundColor = 'black'}else{check = true; document.getElementById('rot').style.backgroundColor = 'white'}
+    if(hum){
+        hum = false
+    }
+    else{
+        hum = true
+    }
+    if (chance != hum){
+        handleUpload(fenGenerator())
+    }
     initialize()
 })
