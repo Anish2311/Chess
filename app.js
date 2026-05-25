@@ -2,7 +2,7 @@ const board = document.getElementById('board')
 const prom = document.getElementById('promotion')
 let dim = Math.min(window.innerHeight,window.innerWidth)
 let grid = []
-let FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR'
+let FEN = 'rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1'
 let sel = null
 let selLegal = []
 let moves = []
@@ -135,18 +135,50 @@ function initialize(){
 function fenConv(fen){
     let x = 0
     let y = 0
-    for(let i = 0; i < fen.length; i ++){
-        if(fen[i] == '/'){
+    let l = fen.split(" ")
+    let iter = l[0]
+    if (l[1] == 'w'){
+        chance = true
+    }
+    else{
+        chance = false
+    }
+    if (l[2].includes('K')){
+        WCasR = true
+    }
+    else{
+        WCasR = false
+    }
+    if (l[2].includes('k')){
+        BCasR = true
+    }
+    else{
+        BCasR = false
+    }
+    if (l[2].includes('Q')){
+        WCasL = true
+    }
+    else{
+        WCasL = false
+    }
+    if (l[2].includes('q')){
+        BCasL = true
+    }
+    else{
+        BCasL = false
+    }
+    for(let i = 0; i < iter.length; i ++){
+        if(iter[i] == '/'){
             x += 1
             y = 0
         }
         else{
-            if(isNaN(parseInt(fen[i])) == false){
-                y += parseInt(fen[i])
+            if(isNaN(parseInt(iter[i])) == false){
+                y += parseInt(iter[i])
             }
             else{
                 let ind = y + x * 8
-                grid[ind] = fen[i]
+                grid[ind] = iter[i]
                 y += 1
             }
         }
@@ -178,7 +210,11 @@ function fenGenerator(){
     if (sp != 0){
         fen = fen + `${sp}`
     }
-    console.log(fen);
+    fen += " "
+    if (WCasR)fen += "K"
+    if (WCasL)fen += "Q"
+    if (BCasR)fen += "k"
+    if (BCasL)fen += "q"
     
     return fen
 }
@@ -379,7 +415,7 @@ function king(i,wh,gr){
         if(wh && WCasR && gr[i + 1] == ' ' && gr[i + 2] == ' '){legal.push(i + 2)}
         if(wh == false && BCasR && gr[i + 1] == ' ' && gr[i + 2] == ' '){legal.push(i + 2)}
     }
-    else if(isThere(wh,gr,i-1,true) == false && isThere(wh,gr,i-2,true) == false && isThere(wh,gr,i-3,true) == false && isThere(wh,gr,i,true) == false){
+    if(isThere(wh,gr,i-1,true) == false && isThere(wh,gr,i-2,true) == false && isThere(wh,gr,i-3,true) == false && isThere(wh,gr,i,true) == false){
         if(wh && WCasL && gr[i - 1] == ' ' && gr[i - 2] == ' ' && gr[i - 3] == ' '){legal.push(i - 2)}
         if(wh == false && BCasL && gr[i - 1] == ' ' && gr[i - 2] == ' ' && gr[i - 3] == ' '){legal.push(i - 2)}
     }
@@ -572,8 +608,6 @@ function canCastle(sel,ind){
         if(grid[sel] == 'k'){BCasL = false; BCasR = false}
         if(grid[sel] == 'R'){if(sel%8 == 0){WCasL = false}else if (sel%8 == 7){WCasR = false}}
         if(grid[sel] == 'r'){if(sel%8 == 0){BCasL = false}else if (sel%8 == 7){BCasR = false}}
-        if(grid[ind] == 'R'){if(ind%8 == 0){WCasL = false}else if (ind%8 == 7){WCasR = false}}
-        if(grid[ind] == 'r'){if(ind%8 == 0){BCasL = false}else if (ind%8 == 7){BCasR = false}}
     }
 }
 
