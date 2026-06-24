@@ -57,7 +57,7 @@ async function handleUpload(fen){
     formData.append("starting", JSON.stringify(begining));
 
     try {
-    const res = await fetch("http://localhost:8000/upload", {
+    const res = await fetch("https://chess-engine-hc0d.onrender.com/upload", {
         method: "POST",
         // mode: "cors",
         body: formData,
